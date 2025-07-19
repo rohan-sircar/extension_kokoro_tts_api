@@ -448,18 +448,8 @@ async def create_speech(
     request: CreateSpeechRequest, background_tasks: BackgroundTasks
 ):
     try:
-        # Set the appropriate content type based on the requested format
-        content_types = {
-            ResponseFormatEnum.MP3: "audio/mpeg",
-            ResponseFormatEnum.OPUS: "audio/opus",
-            ResponseFormatEnum.AAC: "audio/aac",
-            ResponseFormatEnum.FLAC: "audio/flac",
-            ResponseFormatEnum.WAV: "audio/wav",
-            ResponseFormatEnum.PCM: "audio/pcm",
-        }
-        content_type = content_types.get(
-            request.response_format, "application/octet-stream"
-        )
+        # Set the appropriate content type using the helper function
+        content_type = get_content_type(request.response_format)
 
         if request.stream and request.model == "chatterbox":
             # Return streaming response for chatterbox
