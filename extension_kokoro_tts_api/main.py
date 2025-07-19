@@ -12,11 +12,14 @@ from tts_webui.config.config_utils import get_config_value, set_config_value
 #     get_api_status,
 # )
 
+def get_api_config(key, default):
+    """Get API config value with priority: env var > config file > default"""
+    env_key = f"OPENAI_API_{key.upper()}"
+    return os.environ.get(env_key) or get_config_value("extension_kokoro_tts_api", key, default)
 
 def activate_api(host=None, port=None):
-    host = host or get_config_value(
-        "extension_kokoro_tts_api", "host", "0.0.0.0")
-    port = port or get_config_value("extension_kokoro_tts_api", "port", 7778)
+    host = host or get_api_config("host", "0.0.0.0")
+    port = port or get_api_config("port", 7778)
     from .api import app
 
     import uvicorn
@@ -40,9 +43,8 @@ def get_api_status():
 
 
 def test_api(host=None, port=None):
-    host = host or get_config_value(
-        "extension_kokoro_tts_api", "host", "0.0.0.0")
-    port = port or get_config_value("extension_kokoro_tts_api", "port", 7778)
+    host = host or get_api_config("host", "0.0.0.0")
+    port = port or get_api_config("port", 7778)
     import requests
 
     if host == "0.0.0.0":
@@ -66,9 +68,8 @@ def test_api(host=None, port=None):
 
 
 def test_api_with_open_ai(host=None, port=None):
-    host = host or get_config_value(
-        "extension_kokoro_tts_api", "host", "0.0.0.0")
-    port = port or get_config_value("extension_kokoro_tts_api", "port", 7778)
+    host = host or get_api_config("host", "0.0.0.0")
+    port = port or get_api_config("port", 7778)
     from openai import OpenAI
 
     if host == "0.0.0.0":
@@ -195,13 +196,11 @@ def startup_ui():
 
             host = gr.Textbox(
                 label="Host",
-                value=lambda: get_config_value(
-                    "extension_kokoro_tts_api", "host", "0.0.0.0")
+                value=lambda: get_api_config("host", "0.0.0.0")
             )
             port = gr.Number(
                 label="Port",
-                value=lambda: get_config_value(
-                    "extension_kokoro_tts_api", "port", 7778)
+                value=lambda: get_api_config("port", 7778)
             )
             host.change(
                 fn=lambda x: set_config_value(
